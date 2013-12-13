@@ -87,7 +87,7 @@ nginx::resource::vhost { 'rack.puppetlabs.com':
 
 @@nginx::resource::member { "${puppet_rack_app}-${hostname}-${port}":
   upstream => 'puppet_rack_app',
-  host     => $hostname',
+  host     => $hostname,
   port     => $port,
   tag      => 'puppet_rack_app'
 }
