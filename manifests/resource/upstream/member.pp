@@ -34,7 +34,7 @@ define nginx::resource::upstream::member(
     }
   }
 
-  concat::fragment{ "upstream_${upstream}_${server}":
+  concat::fragment{ "upstream_${upstream}_${name}":
     target  => $upstream_file,
     content => "${server_line};\n",
     notify  => Class["nginx::service"]
