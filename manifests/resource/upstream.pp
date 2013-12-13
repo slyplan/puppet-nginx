@@ -15,9 +15,9 @@
 #  nginx::resource::upstream { 'proxypass':
 #    ensure  => present,
 #    members => [
-#      'localhost:3000',
-#      'localhost:3001',
-#      'localhost:3002',
+#      "localhost:3000",
+#      "localhost:3001",
+#      "localhost:3002",
 #    ],
 #  }
 #
@@ -30,29 +30,54 @@
 #  nginx::resource::upstream { 'proxypass':
 #    ensure              => present,
 #    members => [
-#      'localhost:3000',
-#      'localhost:3001',
-#      'localhost:3002',
+#      "localhost:3000",
+#      "localhost:3001",
+#      "localhost:3002",
 #    ],
 #    upstream_cfg_prepend => $my_config,
 #  }
 define nginx::resource::upstream (
-  $members,
+  $members = [],
   $ensure = 'present',
-  $upstream_cfg_prepend = undef,
-) {
-  File {
+  $upstream_cfg_prepend = {}) {
+
+  include concat::setup
+
+  # $upstream_path = "/etc/nginx/conf.d/${name}"
+  $upstream_file = "/etc/nginx/conf.d/${name}-upstream.conf"
+
+  concat { $upstream_file:
     owner => 'root',
     group => 'root',
     mode  => '0644',
+    notify => Class["nginx::service"]
   }
 
-  file { "/etc/nginx/conf.d/${name}-upstream.conf":
-    ensure  => $ensure ? {
-      'absent' => absent,
-      default  => 'file',
-    },
-    content => template('nginx/conf.d/upstream.erb'),
-    notify  => Class['nginx::service'],
+  concat::fragment{ "upstream_${name}_header":
+    target  => $upstream_file,
+    content => "upstream ${name} {\n",
+    order   => '001'
   }
+
+  $upstream_cfg = join(join_keys_to_values($upstream_cfg_prepend, " "), ";\n")
+
+  concat::fragment{ "upstream_${name}_cfg":
+    target  => $upstream_file,
+    content => "${upstream_cfg} \n",
+    order   => '002'
+  } 
+
+  concat::fragment{ "upstream_${name}_footer":
+    target  => $upstream_file,
+    content => "\n }",
+    order   => '999'
+  } 
+
+  $members_with_upstream = prefix($members, "${name}:")
+  if size($members) > 0 {
+    nginx::resource::str2member{ $members_with_upstream: } 
+  }
+
+  Nginx::Resource::Member <<| tag == $name |>>
+
 }

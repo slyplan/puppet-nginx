@@ -1,6 +1,12 @@
 # NGINX Module
 
+Kirill Kalmykov <slyplan@gmail.com>
+
+Forked from 
+
 James Fryman <james@frymanet.com>
+
+Changes not tested yet.
 
 This module manages NGINX configuration.
 
@@ -26,6 +32,19 @@ nginx::resource::vhost { 'www.puppetlabs.com':
 ```puppet
 nginx::resource::upstream { 'puppet_rack_app':
  ensure  => present,
+}
+
+nginx::resource::vhost { 'rack.puppetlabs.com':
+  ensure => present,
+  proxy  => 'http://puppet_rack_app',
+}
+```
+
+### Or with predefined members of backend
+
+```puppet
+nginx::resource::upstream { 'puppet_rack_app':
+ ensure  => present,
  members => [
    'localhost:3000',
    'localhost:3001',
@@ -36,6 +55,41 @@ nginx::resource::upstream { 'puppet_rack_app':
 nginx::resource::vhost { 'rack.puppetlabs.com':
   ensure => present,
   proxy  => 'http://puppet_rack_app',
+}
+```
+
+### Add another backend member
+
+```puppet
+nginx::resource::member { 'my app server':
+  upstream => 'puppet_rack_app',
+  host     => 'application-server-1.mydomain.com',
+  port     => '3000'
+}
+```
+
+### To automatically add backend servers to upstream
+
+```puppet
+# Define upstream on proxy server
+
+nginx::resource::upstream { 'puppet_rack_app':
+ ensure  => present,
+}
+
+nginx::resource::vhost { 'rack.puppetlabs.com':
+  ensure => present,
+  proxy  => 'http://puppet_rack_app',
+}
+
+# Define exported upstream member on backend server tagged as upstream name
+# It will be added to upstream on next puppet run on proxy
+
+@@nginx::resource::member { "${puppet_rack_app}-${hostname}-${port}":
+  upstream => 'puppet_rack_app',
+  host     => $hostname',
+  port     => $port,
+  tag      => 'puppet_rack_app'
 }
 ```
 
