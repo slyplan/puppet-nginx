@@ -67,21 +67,22 @@ nginx::resource::upstream::member { 'localhost:3000':
 ```
 
 ### To automatically add backend servers to upstream
-# Define upstream on proxy server
+
+Define upstream on proxy server
+
 ```puppet
 
-nginx::resource::upstream { 'puppet_rack_app':
+nginx::resource::upstream { 'myapp':
  ensure  => present,
 }
 
 nginx::resource::vhost { 'rack.puppetlabs.com':
   ensure => present,
-  proxy  => 'http://puppet_rack_app',
+  proxy  => 'http://myapp',
 }
 ```
 
-# Define exported upstream member on backend server
-# It will be added to upstream on next puppet run on proxy
+Define exported upstream member on backend server. It will be added to upstream on node where was defined nginx::resource::upstream
 
 ```puppet
 @@nginx::resource::upstream::member { "${hostname}:${port}":
