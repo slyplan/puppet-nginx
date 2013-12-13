@@ -39,17 +39,21 @@
 define nginx::resource::upstream (
   $members = [],
   $ensure = 'present',
-  $upstream_cfg_prepend = {}) {
+  $upstream_cfg_prepend = {}
+) {
 
-  include concat::setup
-
-  # $upstream_path = "/etc/nginx/conf.d/${name}"
-  $upstream_file = "/etc/nginx/conf.d/${name}-upstream.conf"
+  $upstream_file = "${nginx::config::nx_conf_dir}/conf.d/${name}.conf"
+  $upstream_cfg = join(join_keys_to_values($upstream_cfg_prepend, " "), ";\n")
+  $upstream_ensure = $ensure ? {
+    'absent' => absent,
+    default  => 'present',
+  }
 
   concat { $upstream_file:
-    owner => 'root',
-    group => 'root',
-    mode  => '0644',
+    owner  => 'root',
+    group  => 'root',
+    mode   => '0644',
+    ensure => $upstream_ensure,
     notify => Class["nginx::service"]
   }
 
@@ -58,8 +62,6 @@ define nginx::resource::upstream (
     content => "upstream ${name} {\n",
     order   => '001'
   }
-
-  $upstream_cfg = join(join_keys_to_values($upstream_cfg_prepend, " "), ";\n")
 
   concat::fragment{ "upstream_${name}_cfg":
     target  => $upstream_file,
@@ -73,11 +75,12 @@ define nginx::resource::upstream (
     order   => '999'
   } 
 
-  $members_with_upstream = prefix($members, "${name}:")
   if size($members) > 0 {
-    nginx::resource::str2member{ $members_with_upstream: } 
+    nginx::resource::upstream::member{ $members: 
+      upstream => $name
+    } 
   }
 
-  Nginx::Resource::Member <<| tag == $name |>>
+  Nginx::Resource::Member <<| upstream == $name |>>
 
 }

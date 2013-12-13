@@ -61,17 +61,14 @@ nginx::resource::vhost { 'rack.puppetlabs.com':
 ### Add another backend member
 
 ```puppet
-nginx::resource::member { 'my app server':
+nginx::resource::upstream::member { 'localhost:3000':
   upstream => 'puppet_rack_app',
-  host     => 'application-server-1.mydomain.com',
-  port     => '3000'
 }
 ```
 
 ### To automatically add backend servers to upstream
-
-```puppet
 # Define upstream on proxy server
+```puppet
 
 nginx::resource::upstream { 'puppet_rack_app':
  ensure  => present,
@@ -81,15 +78,14 @@ nginx::resource::vhost { 'rack.puppetlabs.com':
   ensure => present,
   proxy  => 'http://puppet_rack_app',
 }
+```
 
-# Define exported upstream member on backend server tagged as upstream name
+# Define exported upstream member on backend server
 # It will be added to upstream on next puppet run on proxy
 
-@@nginx::resource::member { "${puppet_rack_app}-${hostname}-${port}":
-  upstream => 'puppet_rack_app',
-  host     => $hostname,
-  port     => $port,
-  tag      => 'puppet_rack_app'
+```puppet
+@@nginx::resource::upstream::member { "${hostname}:${port}":
+  upstream => 'puppet_rack_app'
 }
 ```
 
