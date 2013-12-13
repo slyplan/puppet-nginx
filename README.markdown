@@ -6,7 +6,7 @@ Forked from
 
 James Fryman <james@frymanet.com>
 
-Changes not tested yet.
+Changes tested just on debian OSs.
 
 This module manages NGINX configuration.
 
@@ -72,13 +72,13 @@ Define upstream on proxy server
 
 ```puppet
 
-nginx::resource::upstream { 'myapp':
+nginx::resource::upstream { 'puppet_rack_app':
  ensure  => present,
 }
 
 nginx::resource::vhost { 'rack.puppetlabs.com':
   ensure => present,
-  proxy  => 'http://myapp',
+  proxy  => 'http://puppet_rack_app',
 }
 ```
 
