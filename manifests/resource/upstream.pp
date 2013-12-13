@@ -44,6 +44,9 @@ define nginx::resource::upstream (
 
   $upstream_file = "${nginx::config::nx_conf_dir}/conf.d/${name}.conf"
   $upstream_cfg = join(join_keys_to_values($upstream_cfg_prepend, " "), ";\n")
+  
+  # Now ensure can be only 'present', because current release of concat module does not support param ensure in concat resource
+  # When next version of concat will be released this parameter will be added
   $upstream_ensure = $ensure ? {
     'absent' => absent,
     default  => 'present',
@@ -53,7 +56,6 @@ define nginx::resource::upstream (
     owner  => 'root',
     group  => 'root',
     mode   => '0644',
-    ensure => $upstream_ensure,
     notify => Class["nginx::service"]
   }
 
@@ -81,6 +83,6 @@ define nginx::resource::upstream (
     } 
   }
 
-  Nginx::Resource::Member <<| upstream == $name |>>
+  Nginx::Resource::Upstream::Member <<| upstream == $name |>>
 
 }

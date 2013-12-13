@@ -12,7 +12,7 @@ define nginx::resource::upstream::member(
 
   $server_line   = "  server ${name}"
   $upstream_file = "${nginx::config::nx_conf_dir}/conf.d/${upstream}.conf"
-  $server_ensure = ? {
+  $server_ensure = $ensure ? {
     'absent' => absent,
     'down'   => 'present',
     default  => 'present',
