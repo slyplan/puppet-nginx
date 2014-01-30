@@ -21,8 +21,10 @@
 <% if @proxy_set_body -%>
     proxy_set_body      <%= @proxy_set_body %>;
 <% end -%>
-<% if @location_cfg_append -%><% @location_cfg_append.sort_by {|k,v| k}.each do |key,value| -%>
+<% if @location_cfg_append -%><% @location_cfg_append.sort_by {|k,v| k}.each do |key,value| -%><% if value.is_a?(Array) -%><% value.each do |param| -%>
+    <%= key %> <%= param %>;
+<% end -%><% else -%>
     <%= key %> <%= value %>;
-<% end -%><% end -%>
+<% end -%><% end -%><% end -%>
   }
 
