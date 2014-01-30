@@ -231,9 +231,10 @@ define nginx::resource::vhost (
       location_custom_cfg => $location_custom_cfg,
       notify              => Class['nginx::service'],
     }
-  } else {
-    $root = $www_root
-  }
+  } # else {
+    
+  $root = $www_root
+  # }
 
   # Support location_cfg_prepend and location_cfg_append on default location created by vhost
   if $location_cfg_prepend {

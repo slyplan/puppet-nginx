@@ -145,9 +145,9 @@ define nginx::resource::location (
   if (($www_root == undef) and ($proxy == undef) and ($location_alias == undef) and ($stub_status == undef) and ($fastcgi == undef) and ($location_custom_cfg == undef)) {
     fail('Cannot create a location reference without a www_root, proxy, location_alias, fastcgi, stub_status, or location_custom_cfg defined')
   }
-  if (($www_root != undef) and ($proxy != undef)) {
-    fail('Cannot define both directory and proxy in a virtual host')
-  }
+  # if (($www_root != undef) and ($proxy != undef)) {
+  #   fail('Cannot define both directory and proxy in a virtual host')
+  # }
 
   # Use proxy or fastcgi template if $proxy is defined, otherwise use directory template.
   if ($proxy != undef) {
@@ -158,7 +158,7 @@ define nginx::resource::location (
     $content_real = template('nginx/vhost/vhost_location_stub_status.erb')
   } elsif ($fastcgi != undef) {
     $content_real = template('nginx/vhost/vhost_location_fastcgi.erb')
-  } elsif ($www_root != undef) {
+  } elsif (($www_root != undef) and ($proxy == undef)) {
     $content_real = template('nginx/vhost/vhost_location_directory.erb')
   } else {
     $content_real = template('nginx/vhost/vhost_location_empty.erb')
